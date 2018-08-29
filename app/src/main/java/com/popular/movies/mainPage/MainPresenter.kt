@@ -1,6 +1,7 @@
 package com.popular.movies.mainPage
 
 import com.popular.movies.model.ModelGenres
+import com.popular.movies.model.ModelMovies
 import com.popular.movies.mvp.BaseMvpPresenterImpl
 import com.popular.movies.network.ApiHelper
 import com.popular.movies.util.AppLog
@@ -22,20 +23,24 @@ class MainPresenter : BaseMvpPresenterImpl<MainContract.View>(),
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         { response ->
-                            val size = response.results?.size ?: 0
-                            for (i in 0 until size) {
-                                for (j in 0 until (listGenre?.size ?: 0)) {
-                                    if (response.results?.get(i)?.genreIds?.get(0)
-                                            == listGenre?.get(j)?.id) {
-                                        response.results?.get(i)?.genres = listGenre?.get(j)?.name
-                                        break
-                                    }
-                                }
-                            }
+                            setGenre(response.results, listGenre)
                             mView?.showPopularMovies(response.results)
                         },
                         { err -> AppLog.d(err.localizedMessage) },
                         { AppLog.d("Chains Completed") }
                 )
+    }
+
+    private fun setGenre(listMovie: List<ModelMovies.Result>?,
+                         listGenre: List<ModelGenres.Genre>?) {
+        val movieSize = listMovie?.size ?: 0
+        for (i in 0 until movieSize) {
+            for (j in 0 until (listGenre?.size ?: 0)) {
+                if (listMovie?.get(i)?.genreIds?.get(0) == listGenre?.get(j)?.id) {
+                    listMovie?.get(i)?.genres = "Genre : ${listGenre?.get(j)?.name}"
+                    break
+                }
+            }
+        }
     }
 }

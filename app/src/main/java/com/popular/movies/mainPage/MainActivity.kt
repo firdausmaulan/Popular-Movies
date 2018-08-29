@@ -17,7 +17,7 @@ class MainActivity : BaseMvpActivity<MainContract.View,
     override var mPresenter: MainContract.Presenter = MainPresenter()
 
     private var mMovieList: ArrayList<ModelMovies.Result> = ArrayList()
-    private var mMainAdapter: MainAdapter? = null
+    private lateinit var mMainAdapter: MainAdapter
     private var mLastIndex = 1
     private var mAllowedToRequest = true
 
@@ -45,7 +45,7 @@ class MainActivity : BaseMvpActivity<MainContract.View,
         srlMovieList?.setOnRefreshListener { onRefresh() }
 
         // handle event onItemClick and onClickFavourite
-        mMainAdapter?.setOnItemClickListener(object : MainAdapter.ClickListener {
+        mMainAdapter.setOnItemClickListener(object : MainAdapter.ClickListener {
             override fun onItemClick(position: Int, v: View, model: ModelMovies.Result?) {
 
             }
@@ -82,7 +82,7 @@ class MainActivity : BaseMvpActivity<MainContract.View,
     override fun showPopularMovies(listMovie: List<ModelMovies.Result>?) {
         listMovie?.let { mMovieList.addAll(it) }
         srlMovieList?.isRefreshing = false
-        mMainAdapter?.notifyDataSetChanged()
+        mMainAdapter.notifyDataSetChanged()
         mAllowedToRequest = true
         mLastIndex++
     }
