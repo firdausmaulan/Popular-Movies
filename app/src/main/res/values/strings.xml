@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Popular Movies</string>
+    <string name="unable_to_connect">Unable to connect</string>
+</resources>

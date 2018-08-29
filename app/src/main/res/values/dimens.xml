@@ -1,0 +1,23 @@
+<resources>
+    <!-- Default -->
+    <dimen name="padding_min_25">-25dp</dimen>
+    <dimen name="padding_2">2dp</dimen>
+    <dimen name="padding_4">4dp</dimen>
+    <dimen name="padding_6">6dp</dimen>
+    <dimen name="padding_8">8dp</dimen>
+    <dimen name="padding_25">25dp</dimen>
+
+    <dimen name="movie_list_image">256dp</dimen>
+    <dimen name="movie_list_favourite">32dp</dimen>
+
+    <dimen name="movie_trailer">400dp</dimen>
+    <dimen name="movie_detail_backdrop">200dp</dimen>
+    <dimen name="movie_detail_poster_width">110dp</dimen>
+    <dimen name="movie_detail_poster_height">170dp</dimen>
+    <dimen name="movie_detail_icon">18dp</dimen>
+
+    <dimen name="txt_14">14sp</dimen>
+    <dimen name="txt_15">15sp</dimen>
+    <dimen name="txt_16">16sp</dimen>
+    <dimen name="txt_18">18sp</dimen>
+</resources>
