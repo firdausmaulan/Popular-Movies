@@ -1,15 +1,26 @@
 package com.popular.movies.mainPage
 
 import android.os.Bundle
+import android.os.Handler
 import android.support.v4.content.ContextCompat
 import android.support.v7.widget.GridLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.view.View
+import android.widget.Toast
+import com.jakewharton.rxbinding2.view.RxView
 import com.popular.movies.R
 import com.popular.movies.model.ModelMovies
 import com.popular.movies.mvp.BaseMvpActivity
 import com.popular.movies.util.RecyclerUtil
 import kotlinx.android.synthetic.main.activity_main.*
+import com.jakewharton.rxbinding2.widget.RxTextView
+import com.popular.movies.util.AppLog
+import com.popular.movies.util.hideSoftInput
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
+import java.util.*
+import java.util.concurrent.TimeUnit
+
 
 class MainActivity : BaseMvpActivity<MainContract.View,
         MainContract.Presenter>(), MainContract.View {
@@ -18,8 +29,9 @@ class MainActivity : BaseMvpActivity<MainContract.View,
 
     private var mMovieList: ArrayList<ModelMovies.Result> = ArrayList()
     private lateinit var mMainAdapter: MainAdapter
-    private var mLastIndex = 1
+    private var mPage = 1
     private var mAllowedToRequest = true
+    private var isExit = false;
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,7 +39,6 @@ class MainActivity : BaseMvpActivity<MainContract.View,
         setRecycleView()
         setSwipeRefreshLayout()
         setAction()
-        mPresenter.loadPopularMovies(mLastIndex)
     }
 
     private fun setSwipeRefreshLayout() {
@@ -64,26 +75,68 @@ class MainActivity : BaseMvpActivity<MainContract.View,
                 }
             }
         })
+
+        RxTextView.textChanges(etSearch)
+                //.filter { charSequence -> charSequence.length >= 3 }
+                .debounce(2, TimeUnit.SECONDS)
+                .map { charSequence -> charSequence.toString() }
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe { string ->
+                    AppLog.d(string)
+                    mPage = 1
+                    mMovieList.clear()
+                    if (string.isEmpty()) {
+                        mPresenter.loadPopularMovies(mPage)
+                    } else if (string.length >= 3) {
+                        mPresenter.loadSearchMovies(mPage, string)
+                    }
+                }
     }
 
     private fun onRefresh() {
-        srlMovieList?.isRefreshing = true
-        mLastIndex = 1
+        mPage = 1
         mMovieList.clear()
-        mPresenter.loadPopularMovies(mLastIndex)
+        if (etSearch.text.length >= 3) {
+            mPresenter.loadSearchMovies(mPage, etSearch.text.toString())
+        } else {
+            mPresenter.loadPopularMovies(mPage)
+        }
     }
 
     private fun loadMore() {
-        srlMovieList?.isRefreshing = true
         mAllowedToRequest = false
-        mPresenter.loadPopularMovies(mLastIndex)
+        if (etSearch.text.length >= 3) {
+            mPresenter.loadSearchMovies(mPage, etSearch.text.toString())
+        } else {
+            mPresenter.loadPopularMovies(mPage)
+        }
     }
 
-    override fun showPopularMovies(listMovie: List<ModelMovies.Result>?) {
+    override fun showMovies(listMovie: List<ModelMovies.Result>?) {
         listMovie?.let { mMovieList.addAll(it) }
-        srlMovieList?.isRefreshing = false
         mMainAdapter.notifyDataSetChanged()
         mAllowedToRequest = true
-        mLastIndex++
+        mPage++
+    }
+
+    override fun showLoading(status: Boolean) {
+        srlMovieList?.isRefreshing = status
+    }
+
+    override fun hideKeyboard() {
+        hideSoftInput()
+    }
+
+    override fun onBackPressed() {
+        if (isExit) {
+            super.onBackPressed()
+        } else {
+            isExit = true
+            Toast.makeText(this,
+                    "Please click BACK again to exit",
+                    Toast.LENGTH_SHORT).show()
+            Handler().postDelayed({ isExit = false }, 5000)
+        }
     }
 }

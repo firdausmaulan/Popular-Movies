@@ -13,4 +13,9 @@ interface ApiService {
     @GET("movie/popular")
     fun getListPopularMovie(@Query("api_key") apiKey: String?,
                             @Query("page") lastIndex: Int?): Observable<ModelMovies>
+
+    @GET("search/movie")
+    fun getListSearchMovie(@Query("api_key") apiKey: String?,
+                           @Query("page") lastIndex: Int?,
+                           @Query("query") query: String?): Observable<ModelMovies>
 }

@@ -1,19 +1,17 @@
 package com.popular.movies.util
 
-class AppUtil {
+import android.app.Activity
+import android.view.View
+import android.view.inputmethod.InputMethodManager
 
-    val API_KEY = stringFromJNI()
 
-    /**
-     * A native method that is implemented by the 'native-lib' native library,
-     * which is packaged with this application.
-     */
-    private external fun stringFromJNI(): String
-
-    companion object {
-        // Used to load the 'native-lib' library on application startup.
-        init {
-            System.loadLibrary("native-lib")
-        }
+fun Activity.hideSoftInput() {
+    val imm = getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+    //Find the currently focused view, so we can grab the correct window token from it.
+    var view = currentFocus
+    //If no view currently has focus, create a new one, just so we can grab a window token from it
+    if (view == null) {
+        view = View(this)
     }
+    imm.hideSoftInputFromWindow(view.windowToken, 0)
 }

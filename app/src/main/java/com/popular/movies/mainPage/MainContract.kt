@@ -8,10 +8,16 @@ import com.popular.movies.mvp.BaseMvpView
 object MainContract {
 
     interface View : BaseMvpView {
-        fun showPopularMovies(listMovie: List<ModelMovies.Result>?)
+        fun showMovies(listMovie: List<ModelMovies.Result>?)
+
+        fun showLoading(status: Boolean)
+
+        fun hideKeyboard()
     }
 
     interface Presenter : BaseMvpPresenter<View> {
         fun loadPopularMovies(lastIndex: Int?)
+
+        fun loadSearchMovies(lastIndex: Int?, query: String?)
     }
 }
