@@ -1,6 +1,5 @@
 package com.popular.movies.mainPage
 
-
 import com.popular.movies.model.ModelGenres
 import com.popular.movies.model.ModelMovies
 import com.popular.movies.mvp.BaseMvpPresenterImpl
@@ -18,10 +17,8 @@ class MainPresenter : BaseMvpPresenterImpl<MainContract.View>(),
     override fun loadPopularMovies(lastIndex: Int?) {
         mView?.showLoading(true)
         mView?.hideKeyboard()
-        val genresRequest: Observable<ModelGenres> = ApiHelper.service
-                .getListGenreName(AppSecret().API_KEY)
-        val popularRequest: Observable<ModelMovies> = ApiHelper.service
-                .getListPopularMovie(AppSecret().API_KEY, lastIndex)
+        val genresRequest = ApiHelper.service.getListGenreName(AppSecret().API_KEY)
+        val popularRequest = ApiHelper.service.getListPopularMovie(AppSecret().API_KEY, lastIndex)
         Observable.zip(genresRequest, popularRequest,
                 BiFunction<ModelGenres, ModelMovies, List<ModelMovies.Result>> { genre, movie ->
                     val listMovie = setGenre(movie.results, genre.genres)
@@ -34,7 +31,8 @@ class MainPresenter : BaseMvpPresenterImpl<MainContract.View>(),
                             mView?.showMovies(response)
                         },
                         { err ->
-                            mView?.showError(err.localizedMessage)
+                            mView?.showLoading(false)
+                            AppLog.e(err.message.toString())
                         },
                         {
                             mView?.showLoading(false)
@@ -60,7 +58,8 @@ class MainPresenter : BaseMvpPresenterImpl<MainContract.View>(),
                             mView?.showMovies(response.results)
                         },
                         { err ->
-                            mView?.showError(err.localizedMessage)
+                            mView?.showLoading(false)
+                            AppLog.e(err.message.toString())
                         },
                         {
                             mView?.showLoading(false)

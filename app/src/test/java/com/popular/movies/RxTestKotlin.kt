@@ -40,10 +40,8 @@ class RxTestKotlin {
 
     @Test
     fun movies() {
-        val genresRequest: Observable<ModelGenres> = ApiHelper.service
-                .getListGenreName(API_KEY)
-        val popularRequest: Observable<ModelMovies> = ApiHelper.service
-                .getListPopularMovie(API_KEY, 1)
+        val genresRequest = ApiHelper.service.getListGenreName(API_KEY)
+        val popularRequest = ApiHelper.service.getListPopularMovie(API_KEY, 1)
         Observable.zip<ModelGenres, ModelMovies, List<ModelMovies.Result>>(
                 genresRequest, popularRequest,
                 BiFunction<ModelGenres, ModelMovies, List<ModelMovies.Result>> { genre, movie ->
