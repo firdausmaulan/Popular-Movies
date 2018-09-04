@@ -1,5 +1,6 @@
 package com.popular.movies
 
+import com.google.gson.Gson
 import com.popular.movies.mainPage.MainContract
 import com.popular.movies.model.ModelGenres
 import com.popular.movies.model.ModelMovies
@@ -45,10 +46,8 @@ class RxTestKotlin {
         Observable.zip<ModelGenres, ModelMovies, List<ModelMovies.Result>>(
                 genresRequest, popularRequest,
                 BiFunction<ModelGenres, ModelMovies, List<ModelMovies.Result>> { genre, movie ->
-                    val movieSize = movie.results?.size ?: 0
-                    val genreSize = genre.genres?.size ?: 0
-                    for (i in 0 until movieSize) {
-                        for (j in 0 until genreSize) {
+                    for (i in 0 until (movie.results?.size ?: 0)) {
+                        for (j in 0 until (genre.genres?.size ?: 0)) {
                             if (movie.results?.get(i)?.genreIds?.get(0) == genre.genres?.get(j)?.id) {
                                 movie.results?.get(i)?.genres = "Genre : ${genre.genres?.get(j)?.name}"
                                 break

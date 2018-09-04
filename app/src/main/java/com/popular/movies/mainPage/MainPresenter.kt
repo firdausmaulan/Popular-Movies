@@ -21,8 +21,7 @@ class MainPresenter : BaseMvpPresenterImpl<MainContract.View>(),
         val popularRequest = ApiHelper.service.getListPopularMovie(AppSecret().API_KEY, lastIndex)
         Observable.zip(genresRequest, popularRequest,
                 BiFunction<ModelGenres, ModelMovies, List<ModelMovies.Result>> { genre, movie ->
-                    val listMovie = setGenre(movie.results, genre.genres)
-                    return@BiFunction listMovie!!
+                    return@BiFunction setGenre(movie.results, genre.genres)!!
                 })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -70,8 +69,7 @@ class MainPresenter : BaseMvpPresenterImpl<MainContract.View>(),
 
     private fun setGenre(listMovie: List<ModelMovies.Result>?,
                          listGenre: List<ModelGenres.Genre>?): List<ModelMovies.Result>? {
-        val movieSize = listMovie?.size ?: 0
-        for (i in 0 until movieSize) {
+        for (i in 0 until (listMovie?.size ?: 0)) {
             for (j in 0 until (listGenre?.size ?: 0)) {
                 if (listMovie?.get(i)?.genreIds?.get(0) == listGenre?.get(j)?.id) {
                     listMovie?.get(i)?.genres = "Genre : ${listGenre?.get(j)?.name}"
