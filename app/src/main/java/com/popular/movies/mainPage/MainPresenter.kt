@@ -1,12 +1,15 @@
 package com.popular.movies.mainPage
 
+
 import com.popular.movies.model.ModelGenres
 import com.popular.movies.model.ModelMovies
 import com.popular.movies.mvp.BaseMvpPresenterImpl
 import com.popular.movies.network.ApiHelper
 import com.popular.movies.util.AppLog
 import com.popular.movies.util.AppSecret
+import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.functions.BiFunction
 import io.reactivex.schedulers.Schedulers
 
 class MainPresenter : BaseMvpPresenterImpl<MainContract.View>(),
@@ -15,29 +18,28 @@ class MainPresenter : BaseMvpPresenterImpl<MainContract.View>(),
     override fun loadPopularMovies(lastIndex: Int?) {
         mView?.showLoading(true)
         mView?.hideKeyboard()
-        val genresRequest = ApiHelper.service.getListGenreName(AppSecret().API_KEY)
-        var listGenre: List<ModelGenres.Genre>? = null
-        genresRequest.flatMap { response ->
-            listGenre = response.genres
-            val popularRequest = ApiHelper.service.getListPopularMovie(AppSecret().API_KEY, lastIndex)
-            return@flatMap popularRequest
-        }.subscribeOn(Schedulers.io())
+        val genresRequest: Observable<ModelGenres> = ApiHelper.service
+                .getListGenreName(AppSecret().API_KEY)
+        val popularRequest: Observable<ModelMovies> = ApiHelper.service
+                .getListPopularMovie(AppSecret().API_KEY, lastIndex)
+        Observable.zip(genresRequest, popularRequest,
+                BiFunction<ModelGenres, ModelMovies, List<ModelMovies.Result>> { genre, movie ->
+                    val listMovie = setGenre(movie.results, genre.genres)
+                    return@BiFunction listMovie!!
+                })
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         { response ->
-                            response.results = setGenre(response.results, listGenre)
-                            mView?.showLoading(false)
-                            mView?.showMovies(response.results)
+                            mView?.showMovies(response)
                         },
                         { err ->
-                            mView?.showLoading(false)
-                            AppLog.d(err.localizedMessage)
+                            mView?.showError(err.localizedMessage)
                         },
                         {
                             mView?.showLoading(false)
                             AppLog.d("Chains Completed")
-                        }
-                )
+                        })
     }
 
     override fun loadSearchMovies(lastIndex: Int?, query: String?) {
@@ -55,12 +57,10 @@ class MainPresenter : BaseMvpPresenterImpl<MainContract.View>(),
                 .subscribe(
                         { response ->
                             response.results = setGenre(response.results, listGenre)
-                            mView?.showLoading(false)
                             mView?.showMovies(response.results)
                         },
                         { err ->
-                            mView?.showLoading(false)
-                            AppLog.d(err.localizedMessage)
+                            mView?.showError(err.localizedMessage)
                         },
                         {
                             mView?.showLoading(false)
