@@ -71,8 +71,14 @@ class MainPresenter : BaseMvpPresenterImpl<MainContract.View>(),
                          listGenre: List<ModelGenres.Genre>?): List<ModelMovies.Result>? {
         for (i in 0 until (listMovie?.size ?: 0)) {
             for (j in 0 until (listGenre?.size ?: 0)) {
-                if (listMovie?.get(i)?.genreIds?.get(0) == listGenre?.get(j)?.id) {
-                    listMovie?.get(i)?.genres = "Genre : ${listGenre?.get(j)?.name}"
+                try {
+                    if (listMovie?.get(i)?.genreIds?.get(0) == listGenre?.get(j)?.id) {
+                        listMovie?.get(i)?.genres = "Genre : ${listGenre?.get(j)?.name}"
+                        break
+                    }
+                } catch (e: IndexOutOfBoundsException) {
+                    e.printStackTrace()
+                    listMovie?.get(i)?.genres = "Genre : -"
                     break
                 }
             }
